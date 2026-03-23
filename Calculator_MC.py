@@ -3,6 +3,7 @@ from collections import namedtuple
 
 Currency = namedtuple("Cirrency", 'rate name')
 
+# Создание записей
 class Record():
     def __init__(self, amount, comment, date=""):
         self.amount = amount
@@ -11,8 +12,9 @@ class Record():
             self.date = dt.datetime.now().date()
         else: 
             self.date = dt.datetime.strptime(date, "%d.%m.%Y").date()
-        print(f"Расход: {self.amount} Комментарий: {self.comment} Дата: {self.date}")
+        print(f"Значение: {self.amount} Комментарий: {self.comment} Дата: {self.date}")
         
+# Родительский класс
 class Calculator():
     def __init__(self, limit):
         self.limit = limit
@@ -36,7 +38,7 @@ class Calculator():
     def today_stats(self):
         return (self.limit - self.get_today_stats())
     
-
+# Дочерний класс, для вычисления расходов
 class CashCalculator(Calculator):
     RUB_RATE = 1
     USD_RATE = 82.8
@@ -47,7 +49,6 @@ class CashCalculator(Calculator):
         "usd": Currency(USD_RATE, "USD"),
         "eur": Currency(EUR_RATE, "EUR")
     }
-    
     def conversion_rate(self, currencie: str):
         return self.CURRENCIES[currencie].rate
         
@@ -62,15 +63,38 @@ class CashCalculator(Calculator):
             print(f"Деньги осталось {rate} {currencie_name}")
         else: 
             print(f"Денег нет и ты в долгу на {rate} {currencie_name}")
+            
+# Дочерний класс для вычисления калорий
+class CaloriesCalculator(Calculator):
+    def get_today_calories_remained(self):
+        today_rate = self.today_stats()
 
-    # class CaloriesCalculator(Calculator):
-    #     def get_today_calories_remained():
-    #         return
+        if today_rate == 0:
+            print(f"Хватит жрать, ты и так жирный")
+        elif today_rate > 0:
+            print(f"Можешь съесть ещё {today_rate} калорий, но я слежу за тобой")
+        else: print(f"Бегом в зал!!")
 
-cash_calculator = CashCalculator(1000)
 
-cash_calculator.add_record(Record(amount=145, comment="кофе")) 
+cash_calculator = CashCalculator(1000)  #Передаём limit денег
+calories_calculator = CaloriesCalculator(4000)  #Передаём limit калорий
+# Создаём записи расходов
+print(f"Расходы: ")
+cash_calculator.add_record(Record(amount=245, comment="Утренний кофе")) 
 cash_calculator.add_record(Record(amount=300, comment="Серёге за обед"))
-cash_calculator.add_record(Record(amount=3000, comment="бар в Танин др", date="08.11.2019"))
+cash_calculator.add_record(Record(amount=1000, comment="Бар на выходных", date="08.11.2019"))
 
+# Создаём записи съеденной еды
+print(f"\nСъел: ")
+calories_calculator.add_record(Record(amount=1186, comment="Тортик"))
+calories_calculator.add_record(Record(amount=1814, comment="Кафешка", date="23.01.2026"))
+calories_calculator.add_record(Record(amount=1140, comment="Вкусняшки"))
+
+print(f"\nРасход деньги: ")
+print(f"Расход за неделю: {cash_calculator.get_week_stats()}")
 print(cash_calculator.get_today_cash_remained("rub"))
+
+
+print(f"\nКалории: ")
+print(f"Наел за неделю: {calories_calculator.get_week_stats()}")
+print(calories_calculator.get_today_calories_remained())
